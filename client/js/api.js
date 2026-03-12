@@ -44,7 +44,14 @@ async function apiRequest(endpoint, options = {}, isRetry = false) {
       headers,
     });
 
-    const data = await response.json();
+    let data;
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      data = { message: text || "Non-JSON response from server" };
+    }
 
     if (!response.ok) {
       // If token expired (401), try to refresh once

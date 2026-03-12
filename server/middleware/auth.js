@@ -11,6 +11,7 @@ const User = require("../models/User");
  * Expects: Authorization: Bearer <firebase-id-token>
  */
 const verifyToken = async (req, res, next) => {
+  console.log(`[API] ${req.method} ${req.originalUrl}`);
   try {
     const authHeader = req.headers.authorization;
 

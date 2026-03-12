@@ -7,6 +7,10 @@ let currentPage = 1;
 let totalPages = 1;
 let currentUserProfile = null;
 
+if (window.location.protocol === "file:") {
+  alert("⚠️ CRITICAL: You are opening this file directly from your computer. Please use http://localhost:5000 to run the project correctly, or the feed will NOT load.");
+}
+
 // Initialize feed when user is authenticated
 requireAuth(async (firebaseUser) => {
   try {
@@ -27,7 +31,12 @@ requireAuth(async (firebaseUser) => {
     await loadFeed();
   } catch (error) {
     console.error("Feed init error:", error);
-    showToast("Failed to load feed", "error");
+    const msg = error.message || "Unknown error";
+    showToast(`Failed to load feed: ${msg}`, "error");
+    // Also include status if available to distinguish 401/404/500
+    if (error.status) {
+      console.log(`Error Status: ${error.status}`);
+    }
   }
 });
 

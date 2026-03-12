@@ -3,6 +3,10 @@
  * Handles Firebase Email/Password signup and login
  */
 
+if (window.location.protocol === "file:") {
+  alert("⚠️ CRITICAL: You are opening this file directly from your computer. Please use http://localhost:5000 to run the project correctly.");
+}
+
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBCZD88agqWk94hhUOgP29SGkx5mgrurAM",

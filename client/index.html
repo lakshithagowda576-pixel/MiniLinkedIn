@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini AI LinkedIn - Sign In</title>
+  <meta name="description" content="Join Mini AI LinkedIn - Connect with professionals, share your expertise, and grow your network with AI-powered features." />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/css/styles.css" />
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=5"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js?v=5"></script>
+</head>
+<body>
+  <!-- ======================== -->
+  <!-- Authentication Page      -->
+  <!-- ======================== -->
+  <div class="auth-container">
+    <div class="auth-card glass-card animate-fade-in-up">
+      
+      <!-- Logo & Branding -->
+      <div class="text-center mb-8">
+        <div class="auth-logo">Mini AI LinkedIn</div>
+        <p class="text-sm mt-2" style="color: var(--text-secondary);">
+          Connect. Share. Grow with AI.
+        </p>
+      </div>
+
+      <!-- ======================== -->
+      <!-- Login Form               -->
+      <!-- ======================== -->
+      <div id="login-section">
+        <h2 class="text-xl font-semibold mb-6 text-center" style="color: var(--text-primary);">
+          Welcome Back
+        </h2>
+
+        <form id="login-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+              Email Address
+            </label>
+            <input 
+              type="email" 
+              id="login-email" 
+              class="glass-input w-full" 
+              placeholder="you@example.com" 
+              required 
+              autocomplete="email"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+              Password
+            </label>
+            <input 
+              type="password" 
+              id="login-password" 
+              class="glass-input w-full" 
+              placeholder="••••••••" 
+              required 
+              autocomplete="current-password"
+            />
+          </div>
+
+          <button type="submit" id="login-btn" class="btn-primary w-full mt-2">
+            Sign In
+          </button>
+        </form>
+
+        <div class="auth-divider">or</div>
+
+        <p class="text-center text-sm" style="color: var(--text-secondary);">
+          Don't have an account? 
+          <a href="#" id="show-signup" class="font-semibold hover:underline" style="color: var(--primary-light);">
+            Create one
+          </a>
+        </p>
+      </div>
+
+      <!-- ======================== -->
+      <!-- Signup Form              -->
+      <!-- ======================== -->
+      <div id="signup-section" class="hidden">
+        <h2 class="text-xl font-semibold mb-6 text-center" style="color: var(--text-primary);">
+          Create Your Account
+        </h2>
+
+        <form id="signup-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+              Full Name
+            </label>
+            <input 
+              type="text" 
+              id="signup-name" 
+              class="glass-input w-full" 
+              placeholder="John Doe" 
+              required 
+              autocomplete="name"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+              Email Address
+            </label>
+            <input 
+              type="email" 
+              id="signup-email" 
+              class="glass-input w-full" 
+              placeholder="you@example.com" 
+              required 
+              autocomplete="email"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary);">
+              Password
+            </label>
+            <input 
+              type="password" 
+              id="signup-password" 
+              class="glass-input w-full" 
+              placeholder="Min. 6 characters" 
+              required 
+              minlength="6"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <button type="submit" id="signup-btn" class="btn-primary w-full mt-2">
+            Create Account
+          </button>
+        </form>
+
+        <div class="auth-divider">or</div>
+
+        <p class="text-center text-sm" style="color: var(--text-secondary);">
+          Already have an account? 
+          <a href="#" id="show-login" class="font-semibold hover:underline" style="color: var(--primary-light);">
+            Sign in
+          </a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/api.js?v=5"></script>
+  <script src="/js/auth.js?v=5"></script>
+</body>
+</html>

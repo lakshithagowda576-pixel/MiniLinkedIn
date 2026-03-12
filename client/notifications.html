@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications - Mini AI LinkedIn</title>
+  <meta name="description" content="See your skill match alerts and connection suggestions." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=5"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js?v=5"></script>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="glass-navbar fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="/feed.html" class="text-xl font-bold" style="background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+        Mini AI LinkedIn
+      </a>
+      <div class="flex items-center gap-2">
+        <a href="/feed.html" class="nav-link flex items-center gap-2 text-sm font-medium" style="color: var(--text-secondary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h1v7c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-7h1a1 1 0 0 0 .7-1.7l-9-9a1 1 0 0 0-1.4 0l-9 9A1 1 0 0 0 3 13z"/></svg>
+          <span class="hidden sm:inline">Home</span>
+        </a>
+        <a href="/profile.html" class="nav-link flex items-center gap-2 text-sm font-medium" style="color: var(--text-secondary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>
+          <span class="hidden sm:inline">Profile</span>
+        </a>
+        <a href="/notifications.html" class="nav-link active flex items-center gap-2 text-sm font-medium" style="color: var(--text-primary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.1-1.6-5.6-4.5-6.3V4c0-.8-.7-1.5-1.5-1.5s-1.5.7-1.5 1.5v.7C7.6 5.4 6 7.9 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          <span class="hidden sm:inline">Notifications</span>
+        </a>
+        <button id="logout-btn" class="nav-link flex items-center gap-2 text-sm font-medium cursor-pointer" style="color: var(--text-secondary); background: none; border: none;">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17 7l-1.4 1.4L18.2 11H8v2h10.2l-2.6 2.6L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+          <span class="hidden sm:inline">Logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-2xl mx-auto px-4 pt-24 pb-12">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 animate-fade-in-up">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: var(--text-primary);">Notifications</h1>
+        <p class="text-sm mt-1" style="color: var(--text-secondary);">
+          Skill matches and connection suggestions
+        </p>
+      </div>
+      <div class="flex gap-3">
+        <button id="find-matches-btn" class="btn-ai text-xs" style="padding: 10px 16px;">
+          Find Skill Matches
+        </button>
+        <button id="mark-read-btn" class="btn-secondary text-xs hidden">
+          Mark all read
+        </button>
+      </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="glass-card overflow-hidden animate-fade-in-up delay-100" style="opacity: 0;">
+      <div id="notifications-loading" class="p-8">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <div id="notifications-list" class="hidden">
+        <!-- Notifications rendered here -->
+      </div>
+
+      <div id="no-notifications" class="empty-state hidden">
+        <div class="empty-state-icon">🔔</div>
+        <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">No notifications yet</h3>
+        <p class="text-sm mb-4" style="color: var(--text-secondary);">
+          When someone shares skills similar to yours, you'll see notifications here.
+        </p>
+        <p class="text-xs" style="color: var(--text-muted);">
+          Tip: Add skills to your profile and create posts mentioning your expertise!
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js?v=5"></script>
+  <script src="/js/auth.js?v=5"></script>
+  <script src="/js/notifications.js?v=5"></script>
+</body>
+</html>

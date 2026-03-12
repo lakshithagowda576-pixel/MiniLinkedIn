@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - Mini AI LinkedIn</title>
+  <meta name="description" content="View professional profile, skills, and posts on Mini AI LinkedIn." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=5"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js?v=5"></script>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="glass-navbar fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="/feed.html" class="text-xl font-bold" style="background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+        Mini AI LinkedIn
+      </a>
+      <div class="flex items-center gap-2">
+        <a href="/feed.html" class="nav-link flex items-center gap-2 text-sm font-medium" style="color: var(--text-secondary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h1v7c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-7h1a1 1 0 0 0 .7-1.7l-9-9a1 1 0 0 0-1.4 0l-9 9A1 1 0 0 0 3 13z"/></svg>
+          <span class="hidden sm:inline">Home</span>
+        </a>
+        <a href="/profile.html" class="nav-link active flex items-center gap-2 text-sm font-medium" style="color: var(--text-primary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>
+          <span class="hidden sm:inline">Profile</span>
+        </a>
+        <a href="/notifications.html" class="nav-link flex items-center gap-2 text-sm font-medium" style="color: var(--text-secondary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.1-1.6-5.6-4.5-6.3V4c0-.8-.7-1.5-1.5-1.5s-1.5.7-1.5 1.5v.7C7.6 5.4 6 7.9 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          <span class="hidden sm:inline">Notifications</span>
+        </a>
+        <button id="logout-btn" class="nav-link flex items-center gap-2 text-sm font-medium cursor-pointer" style="color: var(--text-secondary); background: none; border: none;">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17 7l-1.4 1.4L18.2 11H8v2h10.2l-2.6 2.6L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+          <span class="hidden sm:inline">Logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-2xl mx-auto px-4 pt-24 pb-12">
+
+    <!-- Profile Header Card -->
+    <div class="glass-card overflow-hidden mb-6 animate-fade-in-up" id="profile-card">
+      <!-- Banner -->
+      <div class="profile-banner">
+        <div class="absolute inset-0" style="background: linear-gradient(135deg, rgba(10, 102, 194, 0.6) 0%, rgba(108, 92, 231, 0.6) 50%, rgba(168, 85, 247, 0.4) 100%);"></div>
+      </div>
+
+      <!-- Profile Info -->
+      <div class="p-6 relative">
+        <div class="profile-avatar-wrapper">
+          <img id="profile-avatar" src="" alt="Profile picture" class="profile-avatar-large" />
+        </div>
+
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h1 id="profile-name" class="text-2xl font-bold" style="color: var(--text-primary);">
+              <!-- Name loads here -->
+            </h1>
+            <p id="profile-email" class="text-sm mt-1" style="color: var(--text-muted);">
+              <!-- Email loads here -->
+            </p>
+            <p id="profile-joined" class="text-xs mt-1" style="color: var(--text-muted);">
+              <!-- Joined date loads here -->
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3">
+            <!-- Edit Button (shown only to profile owner) -->
+            <div id="edit-btn-container" class="hidden">
+              <a href="" id="edit-profile-link" class="btn-secondary text-sm flex items-center gap-2" style="text-decoration: none;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Edit Profile
+              </a>
+            </div>
+            
+            <!-- View Resume Button (shown for all users with a professional profile) -->
+            <div id="resume-btn-container">
+              <button id="view-resume-btn" class="btn-primary text-sm flex items-center gap-2" onclick="showToast('Downloading Resume...', 'success')">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                View Resume
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <div class="mt-5">
+          <p id="profile-bio" class="text-sm leading-relaxed" style="color: var(--text-secondary);">
+            <!-- Bio loads here -->
+          </p>
+          <p id="no-bio" class="text-sm italic hidden" style="color: var(--text-muted);">
+            No bio yet.
+          </p>
+        </div>
+
+        <!-- Skills -->
+        <div class="mt-5">
+          <h3 class="text-sm font-semibold mb-3" style="color: var(--text-secondary);">Skills</h3>
+          <div id="profile-skills" class="flex flex-wrap gap-2">
+            <!-- Skills loaded here -->
+          </div>
+          <p id="no-skills" class="text-sm italic hidden" style="color: var(--text-muted);">
+            No skills added yet.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- User's Posts Section -->
+    <div class="glass-card p-6 animate-fade-in-up delay-200" style="opacity: 0;">
+      <h2 class="text-lg font-semibold mb-4" style="color: var(--text-primary);">Recent Posts</h2>
+      <div id="user-posts">
+        <div class="loading-spinner"></div>
+      </div>
+      <div id="no-posts" class="empty-state hidden" style="padding: 32px;">
+        <div class="empty-state-icon">📝</div>
+        <p class="text-sm" style="color: var(--text-muted);">No posts yet.</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js?v=5"></script>
+  <script src="/js/auth.js?v=5"></script>
+  <script src="/js/profile.js?v=5"></script>
+</body>
+</html>

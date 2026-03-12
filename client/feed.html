@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Feed - Mini AI LinkedIn</title>
+  <meta name="description" content="See what professionals are sharing. Discover posts, engage with content, and grow your network." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=5"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js?v=5"></script>
+</head>
+<body>
+  <!-- ======================== -->
+  <!-- Navigation Bar           -->
+  <!-- ======================== -->
+  <nav class="glass-navbar fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <!-- Logo -->
+      <a href="/feed.html" class="text-xl font-bold" style="background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+        Mini AI LinkedIn
+      </a>
+
+      <!-- Nav Links -->
+      <div class="flex items-center gap-2">
+        <a href="/feed.html" class="nav-link active flex items-center gap-2 text-sm font-medium" style="color: var(--text-primary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h1v7c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-7h1a1 1 0 0 0 .7-1.7l-9-9a1 1 0 0 0-1.4 0l-9 9A1 1 0 0 0 3 13z"/></svg>
+          <span class="hidden sm:inline">Home</span>
+        </a>
+        <a href="/profile.html" class="nav-link flex items-center gap-2 text-sm font-medium" style="color: var(--text-secondary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"/></svg>
+          <span class="hidden sm:inline">Profile</span>
+        </a>
+        <a href="/notifications.html" class="nav-link flex items-center gap-2 text-sm font-medium relative" style="color: var(--text-secondary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.1-1.6-5.6-4.5-6.3V4c0-.8-.7-1.5-1.5-1.5s-1.5.7-1.5 1.5v.7C7.6 5.4 6 7.9 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          <span class="hidden sm:inline">Notifications</span>
+          <span id="nav-notif-badge" class="notification-badge hidden">0</span>
+        </a>
+        <button id="logout-btn" class="nav-link flex items-center gap-2 text-sm font-medium cursor-pointer" style="color: var(--text-secondary); background: none; border: none;">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17 7l-1.4 1.4L18.2 11H8v2h10.2l-2.6 2.6L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+          <span class="hidden sm:inline">Logout</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ======================== -->
+  <!-- Main Content             -->
+  <!-- ======================== -->
+  <main class="max-w-5xl mx-auto px-4 pt-24 pb-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Left Column: Feed -->
+    <div class="lg:col-span-2">
+      <!-- Create Post CTA -->
+      <div class="glass-card p-5 mb-6 animate-fade-in-up">
+        <div class="flex items-center gap-4">
+          <img id="feed-user-avatar" src="" alt="Your avatar" class="post-avatar" style="width:44px; height:44px;" />
+          <a href="/create-post.html" class="glass-input flex-1 cursor-pointer flex items-center" style="color: var(--text-muted); text-decoration: none;">
+            What's on your mind?
+          </a>
+          <a href="/create-post.html" class="btn-primary text-sm" style="text-decoration: none; padding: 10px 20px;">
+            Post
+          </a>
+        </div>
+      </div>
+
+      <!-- Feed Posts Container -->
+      <div id="feed-container">
+        <!-- Loading skeleton -->
+        <div id="feed-loading" class="space-y-6">
+          <div class="post-card">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="skeleton" style="width:48px;height:48px;border-radius:50%;"></div>
+              <div class="space-y-2 flex-1">
+                <div class="skeleton" style="width:140px;height:14px;"></div>
+                <div class="skeleton" style="width:80px;height:10px;"></div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="skeleton" style="width:100%;height:14px;"></div>
+              <div class="skeleton" style="width:80%;height:14px;"></div>
+              <div class="skeleton" style="width:60%;height:14px;"></div>
+            </div>
+          </div>
+          <div class="post-card">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="skeleton" style="width:48px;height:48px;border-radius:50%;"></div>
+              <div class="space-y-2 flex-1">
+                <div class="skeleton" style="width:120px;height:14px;"></div>
+                <div class="skeleton" style="width:90px;height:10px;"></div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="skeleton" style="width:100%;height:14px;"></div>
+              <div class="skeleton" style="width:70%;height:14px;"></div>
+            </div>
+            <div class="skeleton mt-4" style="width:100%;height:250px;border-radius:12px;"></div>
+          </div>
+        </div>
+
+        <!-- Posts will be rendered here -->
+        <div id="posts-list" class="hidden"></div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-state-icon">📝</div>
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary);">No posts yet</h3>
+          <p class="mb-6" style="color: var(--text-secondary);">Be the first to share something with the community!</p>
+          <a href="/create-post.html" class="btn-primary" style="text-decoration: none;">Create a Post</a>
+        </div>
+      </div>
+
+      <!-- Load More Button -->
+      <div id="load-more-container" class="text-center mt-8 hidden">
+        <button id="load-more-btn" class="btn-secondary">Load More Posts</button>
+      </div>
+    </div>
+
+    <!-- Right Column: Sidebar -->
+    <aside class="hidden lg:block space-y-6">
+      
+      <!-- Top Companies for Recruitment -->
+      <div class="glass-card p-5 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <h3 class="text-md font-bold mb-4 flex items-center gap-2" style="color: var(--text-primary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" class="text-blue-500"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+          Top Companies Recruiting
+        </h3>
+        <ul class="space-y-4">
+          <li class="flex items-center gap-3">
+            <img src="https://ui-avatars.com/api/?name=Google&background=4285F4&color=fff" alt="Google" class="w-10 h-10 rounded shadow-sm object-cover bg-white" />
+            <div class="flex-1">
+              <p class="text-sm font-semibold" style="color: var(--text-primary);">Google</p>
+              <p class="text-xs" style="color: var(--text-muted);">Software Engineering • Remote</p>
+            </div>
+            <button class="text-blue-500 text-sm font-medium hover:underline" onclick="showToast('Application submitted successfully!', 'success')">Apply</button>
+          </li>
+          <li class="flex items-center gap-3">
+            <img src="https://ui-avatars.com/api/?name=Microsoft&background=00A4EF&color=fff" alt="Microsoft" class="w-10 h-10 rounded shadow-sm object-cover bg-white" />
+            <div class="flex-1">
+              <p class="text-sm font-semibold" style="color: var(--text-primary);">Microsoft</p>
+              <p class="text-xs" style="color: var(--text-muted);">AI & Data • Hybrid</p>
+            </div>
+            <button class="text-blue-500 text-sm font-medium hover:underline" onclick="showToast('Application submitted successfully!', 'success')">Apply</button>
+          </li>
+          <li class="flex items-center gap-3">
+            <img src="https://ui-avatars.com/api/?name=Amazon&background=FF9900&color=fff" alt="Amazon" class="w-10 h-10 rounded shadow-sm object-cover bg-white" />
+            <div class="flex-1">
+              <p class="text-sm font-semibold" style="color: var(--text-primary);">Amazon</p>
+              <p class="text-xs" style="color: var(--text-muted);">Cloud Architecture</p>
+            </div>
+            <button class="text-blue-500 text-sm font-medium hover:underline" onclick="showToast('Application submitted successfully!', 'success')">Apply</button>
+          </li>
+        </ul>
+        <a href="#" class="block mt-4 text-sm text-center text-blue-500 hover:underline">View all jobs</a>
+      </div>
+
+      <!-- Suggested Profiles -->
+      <div class="glass-card p-5 animate-fade-in-up" style="animation-delay: 0.2s;">
+        <h3 class="text-md font-bold mb-4 flex items-center gap-2" style="color: var(--text-primary);">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" class="text-blue-500"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          People you may know
+        </h3>
+        <ul class="space-y-4">
+          <li class="flex items-start gap-3">
+            <img src="https://ui-avatars.com/api/?name=Alex+Johnson&background=0a66c2&color=fff" alt="Profile 1" class="w-12 h-12 rounded-full shadow-sm object-cover border border-gray-700/30" />
+            <div class="flex-1 pt-1">
+              <p class="text-sm font-semibold leading-tight" style="color: var(--text-primary);">Alex Johnson</p>
+              <p class="text-xs mb-1" style="color: var(--text-muted);">Senior Frontend Developer at Meta</p>
+              <button class="px-3 py-1 text-xs border border-[var(--primary)] text-[var(--primary)] rounded-full font-medium transition-colors hover:bg-[var(--primary)] hover:text-white mt-1" onclick="showToast('Connection request sent!', 'success')">Connect</button>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <img src="https://ui-avatars.com/api/?name=Sarah+Connor&background=6c5ce7&color=fff" alt="Profile 2" class="w-12 h-12 rounded-full shadow-sm object-cover border border-gray-700/30" />
+            <div class="flex-1 pt-1">
+              <p class="text-sm font-semibold leading-tight" style="color: var(--text-primary);">Sarah Connor</p>
+              <p class="text-xs mb-1" style="color: var(--text-muted);">AI Researcher | Tech Enthusiast</p>
+              <button class="px-3 py-1 text-xs border border-[var(--primary)] text-[var(--primary)] rounded-full font-medium transition-colors hover:bg-[var(--primary)] hover:text-white mt-1" onclick="showToast('Connection request sent!', 'success')">Connect</button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Footer-like Links in Sidebar -->
+      <div class="text-xs text-center space-x-2 space-y-2 mt-6" style="color: var(--text-muted);">
+        <a href="#" class="hover:underline">About</a>
+        <a href="#" class="hover:underline">Accessibility</a>
+        <a href="#" class="hover:underline">Help Center</a><br/>
+        <a href="#" class="hover:underline">Privacy & Terms</a>
+        <a href="#" class="hover:underline">Ad Choices</a><br/>
+        <span class="inline-block mt-2">Mini AI LinkedIn © 2026</span>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- Scripts -->
+  <script src="/js/api.js?v=5"></script>
+  <script src="/js/auth.js?v=5"></script>
+  <script src="/js/feed.js?v=5"></script>
+</body>
+</html>

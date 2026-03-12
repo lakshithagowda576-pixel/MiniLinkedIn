@@ -39,17 +39,29 @@ const verifyToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Token verification failed:", error.message);
+    console.error("Error code:", error.code);
 
     if (error.code === "auth/id-token-expired") {
       return res.status(401).json({
         success: false,
         message: "Token has expired. Please log in again.",
+        code: "TOKEN_EXPIRED"
+      });
+    }
+
+    if (error.code === "auth/argument-error") {
+      return res.status(401).json({
+        success: false,
+        message: "Malformed token. Please log in again.",
+        code: "MALFORMED_TOKEN"
       });
     }
 
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token.",
+      code: "INVALID_TOKEN",
+      error_detail: error.message
     });
   }
 };

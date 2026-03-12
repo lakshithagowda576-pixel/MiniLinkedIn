@@ -104,14 +104,14 @@ async function startServer() {
     console.log("✅ Connected to MongoDB successfully");
     await seedDatabase();
   } catch (err) {
-    console.error("❌ Primary MongoDB connection error:", err.message);
-    console.log("Attempting to start in-memory MongoDB server as fallback...");
+    console.warn("⚠️  Primary MongoDB (Atlas) could not connect. This is usually due to an IP Whitelist issue.");
+    console.log("Attempting to start in-memory MongoDB server as fallback for a seamless local experience...");
     try {
       const { MongoMemoryServer } = require("mongodb-memory-server");
       const mongoServer = await MongoMemoryServer.create();
       const mongoUri = mongoServer.getUri();
       await mongoose.connect(mongoUri);
-      console.log("✅ Connected to In-Memory MongoDB successfully");
+      console.log("✅ Connected to In-Memory MongoDB successfully. (Data will reset on server restart)");
       await seedDatabase();
     } catch (memErr) {
       console.error("❌ In-Memory MongoDB connection failed:", memErr.message);

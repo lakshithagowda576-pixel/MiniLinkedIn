@@ -7,28 +7,29 @@ const API_BASE = "/api";
 
 /**
  * Get the current Firebase auth token
+ * @param {boolean} forceRefresh - If true, force Firebase to issue a fresh token
  * @returns {Promise<string|null>} The Firebase ID token
  */
-async function getAuthToken() {
+async function getAuthToken(forceRefresh = false) {
   const user = firebase.auth().currentUser;
   if (!user) return null;
-  return await user.getIdToken();
+  return await user.getIdToken(forceRefresh);
 }
 
 /**
  * Make an authenticated API request
  * @param {string} endpoint - API endpoint (e.g., "/users/create")
  * @param {object} options - Fetch options
+ * @param {boolean} isRetry - internal flag to prevent infinite loops on token refresh
  * @returns {Promise<object>} - Parsed JSON response
  */
-async function apiRequest(endpoint, options = {}) {
+async function apiRequest(endpoint, options = {}, isRetry = false) {
   const token = await getAuthToken();
 
   const headers = {
     ...(options.headers || {}),
   };
 
-  // Only set Content-Type to JSON if we're not sending FormData
   if (!(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }
@@ -46,6 +47,15 @@ async function apiRequest(endpoint, options = {}) {
     const data = await response.json();
 
     if (!response.ok) {
+      // If token expired (401), try to refresh once
+      if (response.status === 401 && !isRetry) {
+        console.warn(`401 Unauthorized for ${endpoint}. Refreshing token...`);
+        const newToken = await getAuthToken(true);
+        if (newToken) {
+          return apiRequest(endpoint, options, true);
+        }
+      }
+
       const error = new Error(data.message || "Request failed");
       error.status = response.status;
       throw error;
@@ -53,8 +63,12 @@ async function apiRequest(endpoint, options = {}) {
 
     return data;
   } catch (error) {
-    // Only log essential info to avoid console clutter for handled 404s
-    if (error.status !== 404) {
+    if (error.status === 401) {
+      console.error("Session expired or invalid. Redirecting to login.");
+      firebase.auth().signOut().then(() => {
+        window.location.href = "/index.html?error=auth_failed";
+      });
+    } else if (error.status !== 404) {
       console.error(`API Error [${endpoint}]:`, error);
     }
     throw error;

@@ -54,11 +54,14 @@ async function apiRequest(endpoint, options = {}, isRetry = false) {
     }
 
     if (!response.ok) {
+      console.warn(`API Request failed [${response.status}] ${endpoint}:`, data.message);
+      
       // If token expired (401), try to refresh once
       if (response.status === 401 && !isRetry) {
-        console.warn(`401 Unauthorized for ${endpoint}. Refreshing token...`);
+        console.warn(`401 Unauthorized for ${endpoint}. Requesting fresh token from Firebase...`);
         const newToken = await getAuthToken(true);
         if (newToken) {
+          console.log("Successfully obtained fresh token. Retrying request...");
           return apiRequest(endpoint, options, true);
         }
       }
@@ -71,10 +74,8 @@ async function apiRequest(endpoint, options = {}, isRetry = false) {
     return data;
   } catch (error) {
     if (error.status === 401) {
-      console.error("Session expired or invalid. Redirecting to login.");
-      firebase.auth().signOut().then(() => {
-        window.location.href = "/index.html?error=auth_failed";
-      });
+      console.error("Authentication failed. The server rejected the token.");
+      showToast("Authentication Error: Please refresh and try logging in again.", "error");
     } else if (error.status !== 404) {
       console.error(`API Error [${endpoint}]:`, error);
     }
@@ -187,11 +188,19 @@ function requireAuth(callback) {
  */
 async function getCurrentUserProfile() {
   const user = firebase.auth().currentUser;
-  if (!user) throw new Error("Not authenticated");
+  if (!user) {
+    console.error("getCurrentUserProfile: No Firebase user found");
+    throw new Error("Not authenticated");
+  }
+  
+  console.log(`Fetching profile for UID: ${user.uid}`);
   try {
     const data = await apiGet(`/users/${user.uid}`);
+    console.log("✅ Profile fetched successfully");
     return data.user;
   } catch (error) {
+    console.warn(`Profile fetch failed for ${user.uid}:`, error.message);
+    
     // If user not found (status 404), attempt to recreate the profile
     if (error.status === 404 || error.message.toLowerCase().includes("not found")) {
       console.log("Profile not found in MongoDB. Attempting to recreate...");
@@ -203,7 +212,7 @@ async function getCurrentUserProfile() {
         console.log("✅ Profile recreated successfully.");
         return createData.user;
       } catch (createError) {
-        console.error("❌ Failed to recreate profile:", createError);
+        console.error("❌ Failed to recreate profile:", createError.message);
         throw createError;
       }
     }

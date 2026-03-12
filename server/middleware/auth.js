@@ -40,7 +40,8 @@ const verifyToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Token verification failed:", error.message);
-    console.error("Error code:", error.code);
+    console.error("Full Error Object:", JSON.stringify(error));
+    console.error("Stack Trace:", error.stack);
 
     if (error.code === "auth/id-token-expired") {
       return res.status(401).json({

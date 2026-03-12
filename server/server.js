@@ -6,12 +6,16 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
+const helmet = require("helmet");
+const compression = require("compression");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 // Import route modules
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const seedDatabase = require("./seedDatabase");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,22 +24,51 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 // ========================
 
-// Global Request Logger
+// 1. Security Headers (Helmet)
+// Note: We adjust Content Security Policy to allow Tailwind CDN and Google Fonts
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "script-src": ["'self'", "'unsafe-inline'", "cdn.tailwindcss.com", "www.gstatic.com"],
+        "img-src": ["'self'", "data:", "https:", "http:"],
+        "connect-src": ["'self'", "https://vitals.vercel-insights.com"],
+      },
+    },
+  })
+);
+
+// 2. Global Request Logger
 app.use((req, res, next) => {
-  console.log(`[GLOBAL] ${req.method} ${req.url}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
-// Enable CORS for all origins (adjust in production)
+// 3. Rate Limiting (Prevent Brute Force)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: "Too many requests from this IP, please try again after 15 minutes",
+});
+app.use("/api/", limiter);
+
+// 4. Compression (Faster transfers)
+app.use(compression());
+
+// 5. Global CORS
 app.use(cors());
 
-// Parse JSON request bodies
+// 6. JSON & URL Parsing
 app.use(express.json());
-
-// Parse URL-encoded form data
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static frontend files from the client directory
+// 7. Health Check (For web server monitoring)
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", uptime: process.uptime() });
+});
+
+// 8. Static Frontend Files
 app.use(express.static(path.join(__dirname, "..", "client")));
 
 // ========================

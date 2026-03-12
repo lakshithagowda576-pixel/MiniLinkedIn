@@ -24,12 +24,15 @@ if (!firebase.apps.length) {
 }
 
 // DOM Elements
+console.log("Initializing Auth DOM listeners...");
 const loginForm = document.getElementById("login-form");
 const signupForm = document.getElementById("signup-form");
 const showSignupLink = document.getElementById("show-signup");
 const showLoginLink = document.getElementById("show-login");
 const loginSection = document.getElementById("login-section");
 const signupSection = document.getElementById("signup-section");
+
+console.log("Forms found:", { login: !!loginForm, signup: !!signupForm });
 
 // Toggle between Login and Signup forms
 showSignupLink?.addEventListener("click", (e) => {
@@ -112,12 +115,15 @@ loginForm?.addEventListener("submit", async (e) => {
     return;
   }
 
+  console.log(`Login attempt for email: ${email}`);
   try {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<div class="loading-spinner" style="width:20px;height:20px;margin:0 auto;border-width:2px;"></div>';
 
     // Sign in with Firebase
-    await firebase.auth().signInWithEmailAndPassword(email, password);
+    console.log("Calling Firebase signInWithEmailAndPassword...");
+    const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+    console.log("✅ Firebase sign-in successful:", userCredential.user.uid);
 
     showToast("Welcome back! 👋", "success");
 
@@ -138,7 +144,13 @@ loginForm?.addEventListener("submit", async (e) => {
 
 // If user is already logged in, redirect to feed
 firebase.auth().onAuthStateChanged((user) => {
-  if (user && window.location.pathname.includes("index.html")) {
-    window.location.href = "/feed.html";
+  if (user) {
+    console.log("OnAuthStateChanged: User is logged in", user.uid);
+    if (window.location.pathname.includes("index.html") || window.location.pathname === "/" || window.location.pathname.endsWith("/")) {
+      console.log("Redirecting to feed...");
+      window.location.href = "/feed.html";
+    }
+  } else {
+    console.log("OnAuthStateChanged: No user session");
   }
 });

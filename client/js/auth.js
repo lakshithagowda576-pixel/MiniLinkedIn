@@ -1,71 +1,140 @@
 /**
- * Firebase Authentication Middleware
- * Verifies Firebase ID tokens sent in the Authorization header
- * Attaches the decoded user info to req.user
+ * Authentication Page Logic
+ * Handles Firebase Email/Password signup and login
  */
-const admin = require("../../config/firebase");
-const User = require("../models/User");
 
-/**
- * Middleware to verify Firebase JWT token
- * Expects: Authorization: Bearer <firebase-id-token>
- */
-const verifyToken = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Access denied. No token provided.",
-      });
-    }
-
-    // Extract the token from "Bearer <token>"
-    const token = authHeader.split(" ")[1];
-
-    // Verify the token using Firebase Admin SDK
-    const decodedToken = await admin.auth().verifyIdToken(token);
-
-    // Attach Firebase user info to the request object
-    req.firebaseUser = decodedToken;
-
-    // Find the corresponding MongoDB user document
-    const user = await User.findOne({ firebaseUid: decodedToken.uid });
-    if (user) {
-      req.user = user;
-    }
-
-    next();
-  } catch (error) {
-    console.error("Token verification failed:", error.message);
-    console.error("Error code:", error.code);
-
-    if (error.code === "auth/id-token-expired") {
-      return res.status(401).json({
-        success: false,
-        message: "Token has expired. Please log in again.",
-        code: "TOKEN_EXPIRED"
-      });
-    }
-
-    if (error.code === "auth/argument-error") {
-      return res.status(401).json({
-        success: false,
-        message: "Malformed token. Please log in again.",
-        code: "MALFORMED_TOKEN"
-      });
-    }
-
-    return res.status(401).json({
-      success: false,
-      message: "Invalid or expired token.",
-      code: "INVALID_TOKEN",
-      error_detail: error.message
-    });
-  }
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBCZD88agqWk94hhUOgP29SGkx5mgrurAM",
+  authDomain: "minilinkedin-22fce.firebaseapp.com",
+  projectId: "minilinkedin-22fce",
+  storageBucket: "minilinkedin-22fce.firebasestorage.app",
+  messagingSenderId: "734421395930",
+  appId: "1:734421395930:web:b335a44813a97790cbf8e3",
+  measurementId: "G-KWNCGXNLNV",
 };
 
-module.exports = { verifyToken };
+// Initialize Firebase (only if not already initialized)
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
+// DOM Elements
+const loginForm = document.getElementById("login-form");
+const signupForm = document.getElementById("signup-form");
+const showSignupLink = document.getElementById("show-signup");
+const showLoginLink = document.getElementById("show-login");
+const loginSection = document.getElementById("login-section");
+const signupSection = document.getElementById("signup-section");
 
+// Toggle between Login and Signup forms
+showSignupLink?.addEventListener("click", (e) => {
+  e.preventDefault();
+  loginSection.classList.add("hidden");
+  signupSection.classList.remove("hidden");
+  signupSection.classList.add("animate-fade-in-up");
+});
+
+showLoginLink?.addEventListener("click", (e) => {
+  e.preventDefault();
+  signupSection.classList.add("hidden");
+  loginSection.classList.remove("hidden");
+  loginSection.classList.add("animate-fade-in-up");
+});
+
+/**
+ * Handle Signup Form Submission
+ */
+signupForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("signup-name").value.trim();
+  const email = document.getElementById("signup-email").value.trim();
+  const password = document.getElementById("signup-password").value;
+  const submitBtn = signupForm.querySelector('button[type="submit"]');
+
+  if (!name || !email || !password) {
+    showToast("Please fill in all fields", "error");
+    return;
+  }
+
+  if (password.length < 6) {
+    showToast("Password must be at least 6 characters", "error");
+    return;
+  }
+
+  try {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="loading-spinner" style="width:20px;height:20px;margin:0 auto;border-width:2px;"></div>';
+
+    // Create user with Firebase Authentication
+    const userCredential = await firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password);
+
+    // Update Firebase profile display name
+    await userCredential.user.updateProfile({ displayName: name });
+
+    // Create user profile in MongoDB via our API
+    await apiPost("/users/create", { name, email });
+
+    showToast("Account created successfully! 🎉", "success");
+
+    setTimeout(() => {
+      window.location.href = "/feed.html";
+    }, 1000);
+  } catch (error) {
+    console.error("Signup error:", error);
+    let message = "Signup failed. Please try again.";
+    if (error.code === "auth/email-already-in-use") message = "This email is already registered.";
+    showToast(message, "error");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Create Account";
+  }
+});
+
+/**
+ * Handle Login Form Submission
+ */
+loginForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value;
+  const submitBtn = loginForm.querySelector('button[type="submit"]');
+
+  if (!email || !password) {
+    showToast("Please enter your email and password", "error");
+    return;
+  }
+
+  try {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="loading-spinner" style="width:20px;height:20px;margin:0 auto;border-width:2px;"></div>';
+
+    // Sign in with Firebase
+    await firebase.auth().signInWithEmailAndPassword(email, password);
+
+    showToast("Welcome back! 👋", "success");
+
+    setTimeout(() => {
+      window.location.href = "/feed.html";
+    }, 800);
+  } catch (error) {
+    console.error("Login error:", error);
+    let message = "Login failed. Please check your credentials.";
+    if (error.code === "auth/user-not-found") message = "No account found with this email.";
+    if (error.code === "auth/wrong-password") message = "Incorrect password.";
+    
+    showToast(message, "error");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Sign In";
+  }
+});
+
+// If user is already logged in, redirect to feed
+firebase.auth().onAuthStateChanged((user) => {
+  if (user && window.location.pathname.includes("index.html")) {
+    window.location.href = "/feed.html";
+  }
+});

@@ -31,9 +31,14 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "script-src": ["'self'", "'unsafe-inline'", "cdn.tailwindcss.com", "www.gstatic.com"],
-        "img-src": ["'self'", "data:", "https:", "http:"],
-        "connect-src": ["'self'", "https://vitals.vercel-insights.com"],
+        "script-src": ["'self'", "'unsafe-inline'", "cdn.tailwindcss.com", "www.gstatic.com", "apis.google.com"],
+        "img-src": ["'self'", "data:", "https:", "http:", "res.cloudinary.com"],
+        "connect-src": [
+          "'self'", 
+          "https://identitytoolkit.googleapis.com",
+          "https://securetoken.googleapis.com",
+          "https://vitals.vercel-insights.com"
+        ],
       },
     },
   })

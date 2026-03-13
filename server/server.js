@@ -131,7 +131,7 @@ app.use((err, req, res, next) => {
 // Database Connection & Server Start
 // ========================
 
-const seedDatabase = require("./seedDatabase");
+
 
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/mini-ai-linkedin";
